@@ -23,20 +23,37 @@
         .content {
             margin-left: 10px;
         }
+        #nicknameContainer {
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
 <h1>WebSocket Test</h1>
+<div id="nicknameContainer">
+    <input type="text" id="nicknameInput" placeholder="Enter your nickname">
+    <button onclick="setNickname()">Set Nickname</button>
+</div>
 <div id="messageContainer"></div>
-<input type="text" id="messageInput" placeholder="Type your message here...">
-<button onclick="sendMessage()">Send</button>
+<input type="text" id="messageInput" placeholder="Type your message here..." disabled>
+<button onclick="sendMessage()" disabled>Send</button>
 
 <script>
     const socket = new WebSocket('ws://localhost:8080/ws');
     const messageContainer = document.getElementById('messageContainer');
+    let nickname = '';
+    let uuid = generateUUID();
 
     socket.onopen = function(event) {
         console.log('WebSocket is open now.');
+        // 기존 메시지를 로드
+        fetch('/messages')
+            .then(response => response.json())
+            .then(messages => {
+                messages.forEach(message => {
+                    displayMessage(message.sender, message.content);
+                });
+            });
     };
 
     socket.onmessage = function(event) {
@@ -52,10 +69,22 @@
         console.log('WebSocket Error: ' + error);
     };
 
+    function setNickname() {
+        const input = document.getElementById('nicknameInput');
+        nickname = input.value;
+        if (nickname) {
+            document.getElementById('messageInput').disabled = false;
+            document.querySelector('button[onclick="sendMessage()"]').disabled = false;
+            input.disabled = true;
+            document.querySelector('button[onclick="setNickname()"]').disabled = true;
+        }
+    }
+
     function sendMessage() {
         const input = document.getElementById('messageInput');
         const message = {
-            sender: 'user',  // 적절한 사용자 이름으로 변경
+            uuid: uuid,
+            sender: nickname,
             content: input.value
         };
         socket.send(JSON.stringify(message));
@@ -85,6 +114,22 @@
             .then(response => response.json())
             .then(data => console.log('Message saved:', data))
             .catch(error => console.error('Error saving message:', error));
+    }
+
+    function generateUUID() { // Public Domain/MIT
+        var d = new Date().getTime();//Timestamp
+        var d2 = (performance && performance.now && (performance.now()*1000)) || 0;//Time in microseconds since page-load or 0 if unsupported
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            var r = Math.random() * 16;//random number between 0 and 16
+            if(d > 0){ //Use timestamp until depleted
+                r = (d + r)%16 | 0;
+                d = Math.floor(d/16);
+            } else { //Use microseconds since page-load if supported
+                r = (d2 + r)%16 | 0;
+                d2 = Math.floor(d2/16);
+            }
+            return (c==='x' ? r : (r&0x3|0x8)).toString(16);
+        });
     }
 </script>
 </body>
