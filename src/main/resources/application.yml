@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: chatplatform
+#  servlet:
+#    multipart:
+#      max-file-size: ${SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE:1024MB}
+#      max-request-size: ${SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE:1024MB}
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/network_programming}
+    username: ${SPRING_DATASOURCE_USERNAME:zzunny}
+    password: ${SPRING_DATASOURCE_PASSWORD:1234}
+
+  jpa:
+    hibernate:
+      ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:update}
+    show-sql: ${SPRING_JPA_SHOW_SQL:true}
+    properties:
+      hibernate:
+        dialect: ${SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT:org.hibernate.dialect.PostgreSQLDialect}
+
+  websocket:
+    enabled: true
